@@ -1,0 +1,48 @@
+---
+server: # module controller server
+  port: 15020
+  tomcat:
+    max-threads: 100
+    accept-count: 100
+    connection-timeout: 5000ms
+
+spring:
+  application:
+    name: "ingwclient"
+  session:
+    store-type: none
+  task:
+    execution:
+      pool:
+        core-size: 20
+        max-size: 100
+        queue-capacity: 500
+      thread-name-prefix: Async-
+  devtools:
+    livereload:
+      enabled: true
+
+logging:
+  level:
+    root: info
+    org.springframework: warn
+    com.in.amas: info
+
+application: # application server
+  name: "ingwclient"
+  version: "0.0.1"
+  server: # netty server
+    port: 15021
+    state: RUNNING # RUNNING or BLOCKED
+    security:
+      allowed-ips:
+        - "*"
+        - "127.0.0.1"
+      allowed-macs:
+        - "*"
+      access-key: ""
+  client:
+    ip: 192.1.72.101
+    port: 17000
+    sender: AMAS-CLIENT11
+...

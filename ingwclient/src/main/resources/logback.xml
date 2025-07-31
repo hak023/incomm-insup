@@ -1,0 +1,42 @@
+<configuration debug="true" scan="true" scanPeriod="60 seconds">
+    <property name="APP_NAME" value="ingwclient"/>
+    <property name="LOG_HOME" value="${log.home}" />
+    <property name="LOG_PATTERN" value="%d %5p %40.40c:%4L - %m%n"/>
+    <timestamp key="timestamp-by-second" datePattern="yyyyMMdd'T'HHmmss"/>
+    <timestamp key="timestamp-by-day" datePattern="yyyyMMdd"/>
+
+    <!-- ROOT LOGGER -->
+    <property name="LOG_FILE_NAME" value="${APP_NAME}.${timestamp-by-day}.log"/>
+    <property name="ERR_LOG_FILE_NAME" value="${APP_NAME}.${timestamp-by-day}.err"/>
+
+    <appender name="Console-Appender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%highlight(${LOG_PATTERN})</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="RollingFile-Appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${LOG_FILE_NAME}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/rolling/${APP_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>100MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%highlight(${LOG_PATTERN})</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <ImmediateFlush>true</ImmediateFlush>
+    </appender>
+
+    <appender name="Async-Appender" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="RollingFile-Appender" />
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="Console-Appender" />
+        <appender-ref ref="Async-Appender" />
+    </root>
+</configuration>

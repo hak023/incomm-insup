@@ -1,0 +1,21 @@
+@host = 127.0.0.1:15021
+
+### 1. Set the current module state (Running or Blocked)
+POST http://{{host}}/module/state?state=RUNNING
+Content-Type: application/json
+
+
+### 1-1. Get the current module state
+GET http://{{host}}/module/state
+
+
+### 2. Retrieve the list of active integration sessions
+GET http://{{host}}/module/sessions
+
+
+### 3. Retrieve module name and version information
+GET http://{{host}}/module/version
+
+
+### 4. Retrieve service statistics
+GET http://{{host}}/module/stats
