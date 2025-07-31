@@ -39,3 +39,9 @@
 - script directory
   - $AMAS_HOME/script
     - amasctl <service_name|all> <start|stop|restart|status|check>
+
+### 서비스 포트
+- sipproxy : 서비스 controller port 5060, 15000, 운용관리controller port 15001
+- sipsvc : 서비스 controller port 15010, 운용관리controller port 15011
+- ingwclient : 서비스 controller port 15020, 운용관리controller port 15021
+- insupclient : 서비스 controller port 15030, 운용관리controller port 15031
