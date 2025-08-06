@@ -21,12 +21,104 @@
 
 ## 🏗️ 아키텍처
 
+### 시스템 워크플로우
+
+```mermaid
+graph TB
+    subgraph "External Systems"
+        A[sipsvc Client]
+        B[INSUPC Server]
+    end
+    
+    subgraph "Incomm-Insup Gateway"
+        C[SipsvcTcpServer<br/>Port: 9090]
+        D[ConnectionManager]
+        E[WorkerThreadPool<br/>8 Threads]
+        F[MessageProcessor]
+        G[InsupcTcpClient<br/>Connection Pool]
+        H[ProtocolParser]
+    end
+    
+    subgraph "Data Flow"
+        I[WorkerQueue<br/>Async Processing]
+        J[Authentication<br/>IP/MAC/Key]
+        K[Timeout Manager<br/>2 Hour Limit]
+    end
+    
+    A -->|JSON/TCP<br/>auth, heartbeat, execute| C
+    C --> D
+    D --> J
+    J -->|Valid| E
+    E --> I
+    I --> F
+    F --> H
+    H -->|Binary/TCP<br/>Logon, Query| G
+    G -->|Query Request| B
+    B -->|Query Response| G
+    G --> F
+    F -->|JSON Response| C
+    C --> A
+    
+    D --> K
+    K -->|Cleanup| D
+    
+    style A fill:#e1f5fe
+    style B fill:#e8f5e8
+    style C fill:#fff3e0
+    style G fill:#fff3e0
+    style E fill:#f3e5f5
+    style F fill:#f3e5f5
 ```
-[sipsvc] --JSON/TCP--> [Incomm-Insup Gateway] --Binary/TCP--> [INSUPC]
-                           |
-                       [WorkerThread Pool]
-                           |
-                    [Connection Manager]
+
+### 시퀀스 다이어그램
+
+```mermaid
+sequenceDiagram
+    participant S as sipsvc
+    participant GW as Gateway<br/>(TCP Server)
+    participant WP as WorkerPool
+    participant MP as MessageProcessor
+    participant IC as InsupcClient
+    participant I as INSUPC
+
+    Note over S,I: 1. 연결 및 인증 단계
+    S->>+GW: TCP Connect (Port 9090)
+    GW->>+S: Connection Accepted
+    S->>GW: AUTH Message<br/>{type:"auth", client_ip, mac, auth_key}
+    GW->>GW: Validate IP/MAC/AuthKey
+    GW->>-S: AUTH Response<br/>{result_code:"0000", message:"success"}
+
+    Note over S,I: 2. Heartbeat 유지
+    S->>GW: HEARTBEAT Message
+    GW->>S: HEARTBEAT Response
+
+    Note over S,I: 3. 가입자 정보 조회 요청
+    S->>+GW: EXECUTE Message<br/>{type:"execute", phone_number:"025671033"}
+    GW->>+WP: Submit to WorkerQueue
+    WP->>+MP: Process Message
+    
+    MP->>+IC: Get Available Connection
+    IC->>+I: TCP Connect (Port 19000)
+    I->>-IC: Connection Accepted
+    
+    MP->>IC: LOGON Request<br/>(Binary Protocol)
+    IC->>I: Logon Message
+    I->>IC: Logon Response
+    IC->>MP: Logon Success
+    
+    MP->>IC: QUERY Request<br/>(Phone: 025671033)
+    IC->>I: Query Message<br/>(mcidPstnGetInfoV2)
+    I->>IC: Query Response<br/>(Subscriber Info)
+    IC->>-MP: Parse Response
+    
+    MP->>-WP: Process Complete
+    WP->>-GW: Return Response
+    GW->>-S: EXECUTE Response<br/>{result_code:"0000", data:{...}}
+
+    Note over S,I: 4. 연결 정리 (2시간 후)
+    GW->>GW: Connection Timeout Check
+    GW->>S: Close Connection
+    IC->>I: Close Connection
 ```
 
 ### 통신 플로우
@@ -211,6 +303,137 @@ java -jar test-simulator.jar
 
 ## 📁 프로젝트 구조
 
+### 클래스 다이어그램
+
+```mermaid
+classDiagram
+    class IncommInsupApplication {
+        +main(String[] args)
+        +initialize()
+    }
+    
+    class SipsvcTcpServer {
+        -TcpServerConfig config
+        -ConnectionManagementService connectionService
+        -WorkerThreadPool workerPool
+        +start()
+        +sendMessage(connectionId, message)
+        +closeConnection(connectionId)
+    }
+    
+    class InsupcTcpClient {
+        -InsupcConfig config
+        -Map~String,ConnectionPool~ pools
+        +sendMessage(message, requestId)
+        +getAvailableConnection()
+    }
+    
+    class ConnectionManagementService {
+        -Map~String,ClientConnectionInfo~ connections
+        -SecurityConfig securityConfig
+        +registerConnection()
+        +authenticateClient()
+        +sendToSipsvc()
+        +sendToInsupc()
+        +cleanupTimedOutConnections()
+    }
+    
+    class WorkerThreadPool {
+        -List~WorkerQueue~ queues
+        -ThreadPoolExecutor executor
+        -MessageProcessingService processor
+        +submitMessage(WorkerMessage)
+        +getStatus()
+    }
+    
+    class MessageProcessingService {
+        -SipsvcProtocolParser sipsvcParser
+        -InsupcProtocolParser insupcParser
+        +processSipsvcRequest()
+        +processInsupcResponse()
+        +handleFailedMessage()
+    }
+    
+    class SipsvcProtocolParser {
+        +parseMessage(byte[])
+        +serializeMessage(SipsvcMessage)
+        +createAuthResponse()
+        +createExecuteResponse()
+    }
+    
+    class InsupcProtocolParser {
+        +parseMessage(byte[])
+        +serializeMessage(InsupcMessage)
+        +createLogonRequest()
+        +createQueryRequest()
+    }
+    
+    class SipsvcMessage {
+        +String type
+        +String sessionId
+        +String clientIp
+        +String phoneNumber
+        +String resultCode
+        +Object data
+    }
+    
+    class InsupcMessage {
+        +int code
+        +int svca
+        +int dvca
+        +String sessionId
+        +List~InsupcParameter~ parameters
+    }
+    
+    class WorkerMessage {
+        +MessageType messageType
+        +String connectionId
+        +String requestId
+        +SipsvcMessage sipsvcMessage
+        +InsupcMessage insupcMessage
+    }
+    
+    class ClientConnectionInfo {
+        +String connectionId
+        +String clientIp
+        +String macAddress
+        +boolean authenticated
+        +long lastActivityTime
+        +long totalRequests
+    }
+    
+    IncommInsupApplication --> SipsvcTcpServer
+    IncommInsupApplication --> InsupcTcpClient
+    IncommInsupApplication --> ConnectionManagementService
+    IncommInsupApplication --> WorkerThreadPool
+    
+    SipsvcTcpServer --> ConnectionManagementService
+    SipsvcTcpServer --> WorkerThreadPool
+    SipsvcTcpServer --> SipsvcProtocolParser
+    
+    InsupcTcpClient --> InsupcProtocolParser
+    InsupcTcpClient --> WorkerThreadPool
+    
+    ConnectionManagementService --> SipsvcTcpServer
+    ConnectionManagementService --> InsupcTcpClient
+    ConnectionManagementService --> ClientConnectionInfo
+    
+    WorkerThreadPool --> MessageProcessingService
+    WorkerThreadPool --> WorkerMessage
+    
+    MessageProcessingService --> SipsvcProtocolParser
+    MessageProcessingService --> InsupcProtocolParser
+    MessageProcessingService --> ConnectionManagementService
+    
+    SipsvcProtocolParser --> SipsvcMessage
+    InsupcProtocolParser --> InsupcMessage
+    
+    WorkerMessage --> SipsvcMessage
+    WorkerMessage --> InsupcMessage
+```
+
+### 디렉토리 구조
+
 ```
 incomm-insup/
 ├── src/main/java/com/in/amas/
@@ -234,10 +457,12 @@ incomm-insup/
 │   ├── tcp/                          # TCP 서버/클라이언트
 │   │   ├── SipsvcTcpServer.java
 │   │   └── InsupcTcpClient.java
-│   └── worker/                       # 워커 스레드
-│       ├── WorkerThreadPool.java
-│       ├── WorkerQueue.java
-│       └── WorkerTask.java
+│   ├── worker/                       # 워커 스레드
+│   │   ├── WorkerThreadPool.java
+│   │   ├── WorkerQueue.java
+│   │   └── WorkerTask.java
+│   └── simulator/                    # 테스트 시뮬레이터
+│       └── TestSimulator.java
 ├── src/main/resources/
 │   ├── application.yaml
 │   ├── application-test.yaml
@@ -247,6 +472,9 @@ incomm-insup/
 ├── build.sh
 ├── start.sh
 ├── stop.sh
+├── build-simulator.sh
+├── run-simulator.sh
+├── simulator-pom.xml
 └── pom.xml
 ```
 
