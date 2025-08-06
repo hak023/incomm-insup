@@ -1,6 +1,7 @@
 package com.in.amas.worker;
 
 import com.in.amas.dto.WorkerMessage;
+import com.in.amas.service.MessageProcessingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -34,9 +35,15 @@ public class WorkerThreadPool {
     @Value("${worker.thread-name-prefix:worker-}")
     private String threadNamePrefix;
     
+    private final MessageProcessingService messageProcessingService;
+    
     private List<WorkerQueue> workerQueues;
     private ThreadPoolExecutor executorService;
     private final AtomicInteger roundRobinCounter = new AtomicInteger(0);
+    
+    public WorkerThreadPool(MessageProcessingService messageProcessingService) {
+        this.messageProcessingService = messageProcessingService;
+    }
     
     /**
      * WorkerThread Pool 초기화
@@ -76,7 +83,9 @@ public class WorkerThreadPool {
             workerQueues.add(workerQueue);
             
             // 각 큐에 대한 워커 스레드 시작
-            executorService.submit(new WorkerTask(workerQueue));
+            WorkerTask workerTask = new WorkerTask(workerQueue);
+            workerTask.setMessageProcessingService(messageProcessingService);
+            executorService.submit(workerTask);
         }
         
         log.info("WorkerThreadPool 초기화 완료 - {} 개 워커 스레드 시작됨", threadPoolSize);

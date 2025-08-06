@@ -4,6 +4,8 @@ import com.in.amas.dto.ClientConnectionInfo;
 import com.in.amas.dto.SipsvcMessage;
 import com.in.amas.dto.InsupcMessage;
 import com.in.amas.config.SecurityConfig;
+import com.in.amas.tcp.SipsvcTcpServer;
+import com.in.amas.tcp.InsupcTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,8 @@ public class ConnectionManagementService {
     private long connectionTimeout;
     
     private final SecurityConfig securityConfig;
+    private final SipsvcTcpServer sipsvcTcpServer;
+    private final InsupcTcpClient insupcTcpClient;
     
     // 클라이언트 연결 정보 저장
     private final Map<String, ClientConnectionInfo> clientConnections = new ConcurrentHashMap<>();
@@ -42,9 +46,7 @@ public class ConnectionManagementService {
     // 연결 정리용 스케줄러
     private ScheduledExecutorService connectionCleanupScheduler;
     
-    // TCP 서버/클라이언트 인스턴스들 (나중에 주입됨)
-    private Object sipsvcTcpServer;  // SipsvcTcpServer 타입으로 나중에 변경
-    private Object insupcTcpClient;  // InsupcTcpClient 타입으로 나중에 변경
+
     
     @PostConstruct
     public void initialize() {
@@ -203,12 +205,14 @@ public class ConnectionManagementService {
     public void sendToSipsvc(String connectionId, SipsvcMessage message) {
         log.info("sipsvc로 메시지 전송 - 연결 ID: {}, 타입: {}", connectionId, message.getType());
         
-        // TODO: 실제 TCP 서버를 통한 메시지 전송 구현
-        // sipsvcTcpServer.sendMessage(connectionId, message);
-        
-        // 현재는 로그만 출력
-        log.debug("sipsvc 메시지 전송 완료 - 연결 ID: {}, 결과 코드: {}", 
-                connectionId, message.getResultCode());
+        try {
+            sipsvcTcpServer.sendMessage(connectionId, message);
+            log.debug("sipsvc 메시지 전송 완료 - 연결 ID: {}, 결과 코드: {}", 
+                    connectionId, message.getResultCode());
+        } catch (Exception e) {
+            log.error("sipsvc 메시지 전송 실패 - 연결 ID: {}, 오류: {}", 
+                    connectionId, e.getMessage(), e);
+        }
     }
     
     /**
@@ -220,12 +224,18 @@ public class ConnectionManagementService {
     public void sendToInsupc(InsupcMessage message, String requestId) {
         log.info("INSUPC로 메시지 전송 - 요청 ID: {}, 코드: {}", requestId, message.getCode());
         
-        // TODO: 실제 TCP 클라이언트를 통한 메시지 전송 구현
-        // insupcTcpClient.sendMessage(message, requestId);
-        
-        // 현재는 로그만 출력
-        log.debug("INSUPC 메시지 전송 완료 - 요청 ID: {}, 세션 ID: {}", 
-                requestId, message.getSessionId());
+        try {
+            boolean success = insupcTcpClient.sendMessage(message, requestId);
+            if (success) {
+                log.debug("INSUPC 메시지 전송 완료 - 요청 ID: {}, 세션 ID: {}", 
+                        requestId, message.getSessionId());
+            } else {
+                log.error("INSUPC 메시지 전송 실패 - 요청 ID: {}, 연결 불가", requestId);
+            }
+        } catch (Exception e) {
+            log.error("INSUPC 메시지 전송 실패 - 요청 ID: {}, 오류: {}", 
+                    requestId, e.getMessage(), e);
+        }
     }
     
     /**
@@ -251,8 +261,8 @@ public class ConnectionManagementService {
                 // 연결 해제
                 unregisterConnection(connectionId);
                 
-                // TODO: 실제 TCP 연결 종료
-                // sipsvcTcpServer.closeConnection(connectionId);
+                // 실제 TCP 연결 종료
+                sipsvcTcpServer.closeConnection(connectionId);
             }
             
             if (!timedOutConnections.isEmpty()) {
