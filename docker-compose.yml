@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  insup-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: insup-application
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xms512m -Xmx1024m -Djava.awt.headless=true
+    volumes:
+      - ./logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - insup-network
+
+networks:
+  insup-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local

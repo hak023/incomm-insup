@@ -1,0 +1,79 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+spring:
+  application:
+    name: insup-application
+  
+  profiles:
+    active: prod
+  
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Seoul
+    default-property-inclusion: non_null
+  
+  web:
+    resources:
+      add-mappings: true
+
+logging:
+  level:
+    com.incomm.insup: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.apache: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ./logs/application.log
+    max-size: 100MB
+    max-history: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    defaults:
+      enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  
+server:
+  port: 8080
+
+logging:
+  level:
+    com.incomm.insup: DEBUG
+    org.springframework: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  
+server:
+  port: 8080
+
+logging:
+  level:
+    com.incomm.insup: INFO
+    root: WARN
