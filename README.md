@@ -1,6 +1,11 @@
 # 프로젝트명: AMAS(=Application Modernization intelligent network Application Server)
 지능망AS 현대화 상용화 프로젝트
 
+# 맴버
+- yongesamo@naver.com
+- dantae74@gmail.com
+- hak023@nate.com
+
 ## 개발 환경 ( sping initializr, https://start.spring.io )
 - Gradle(groovy)
 - Java Open JDK 21
