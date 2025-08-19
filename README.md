@@ -1,6 +1,9 @@
 # 프로젝트명: AMAS(=Application Modernization intelligent network Application Server)
 지능망AS 현대화 상용화 프로젝트
 
+# 코드 표기법
+- JAVA Code: Camel, Python: Snake 표기법 
+
 # 맴버
 - yongesamo@naver.com
 - dantae74@gmail.com
