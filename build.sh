@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Insup Application 빌드 스크립트
+# Insupclient Application 빌드 스크립트
 # Maven을 사용하여 애플리케이션을 빌드하는 스크립트
 
 set -e
 
 echo "========================================"
-echo "Insup Application 빌드 스크립트"
+echo "Insupclient Application 빌드 스크립트"
 echo "========================================"
 
 # Java 버전 확인
@@ -58,7 +58,7 @@ echo "📦 JAR 파일을 생성합니다..."
 mvn package -DskipTests
 
 # 빌드 결과 확인
-JAR_FILE=$(find target -name "insup-application-*.jar" | head -n 1)
+JAR_FILE=$(find target -name "insupclient-*.jar" | head -n 1)
 
 if [ -z "$JAR_FILE" ]; then
     echo "❌ JAR 파일 생성에 실패했습니다."
@@ -73,7 +73,7 @@ echo "   파일 크기: $(du -h $JAR_FILE | cut -f1)"
 # JAR 파일 정보 출력
 echo ""
 echo "📋 JAR 파일 정보:"
-java -jar $JAR_FILE --version 2>/dev/null || echo "   메인 클래스: com.incomm.insup.InsupApplication"
+java -jar $JAR_FILE --version 2>/dev/null || echo "   메인 클래스: com.in.amas.insupclient.InsupclientApplication"
 
 echo ""
 echo "🚀 애플리케이션을 시작하려면:"

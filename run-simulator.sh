@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Test Simulator 실행 스크립트
+# Insupclient Test Simulator 실행 스크립트
 # Gateway 서버의 전체 플로우를 테스트하는 시뮬레이터
 
 set -e
 
 echo "========================================"
-echo "Incomm-Insup Gateway 테스트 시뮬레이터"
+echo "Insupclient Gateway 테스트 시뮬레이터"
 echo "========================================"
 
 # 환경 변수 설정
@@ -20,7 +20,7 @@ JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8"
 JAVA_OPTS="$JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE"
 
 # 시뮬레이터 JAR 파일 확인
-SIMULATOR_JAR="target/test-simulator.jar"
+SIMULATOR_JAR="target/insupclient-simulator.jar"
 
 if [ ! -f "$SIMULATOR_JAR" ]; then
     echo "❌ 시뮬레이터 JAR 파일을 찾을 수 없습니다: $SIMULATOR_JAR"

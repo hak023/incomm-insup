@@ -1,4 +1,4 @@
-package com.in.amas.config;
+package com.in.amas.insupclient.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

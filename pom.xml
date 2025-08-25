@@ -13,9 +13,9 @@
     </parent>
     
     <groupId>com.in.amas</groupId>
-    <artifactId>incomm-insup</artifactId>
+    <artifactId>insupclient</artifactId>
     <version>1.0.0</version>
-    <name>incomm-insup</name>
+    <name>insupclient</name>
     <description>Gateway Server between sipsvc and INSUPC for Linux Environment</description>
     
     <properties>

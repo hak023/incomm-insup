@@ -2,7 +2,7 @@ spring:
   profiles:
     active: test
   application:
-    name: incomm-insup
+    name: insupclient
 
 # 공통 설정
 server:

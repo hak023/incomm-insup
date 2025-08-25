@@ -1,10 +1,10 @@
-package com.in.amas.tcp;
+package com.in.amas.insupclient.tcp;
 
-import com.in.amas.config.InsupcConfig;
-import com.in.amas.dto.InsupcMessage;
-import com.in.amas.dto.WorkerMessage;
-import com.in.amas.protocol.InsupcProtocolParser;
-import com.in.amas.worker.WorkerThreadPool;
+import com.in.amas.insupclient.config.InsupcConfig;
+import com.in.amas.insupclient.dto.InsupcMessage;
+import com.in.amas.insupclient.dto.WorkerMessage;
+import com.in.amas.insupclient.protocol.InsupcProtocolParser;
+import com.in.amas.insupclient.worker.WorkerThreadPool;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

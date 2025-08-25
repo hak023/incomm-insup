@@ -13,10 +13,10 @@
     </parent>
     
     <groupId>com.in.amas</groupId>
-    <artifactId>test-simulator</artifactId>
+    <artifactId>insupclient-simulator</artifactId>
     <version>1.0.0</version>
-    <name>test-simulator</name>
-    <description>Test Simulator for Incomm-Insup Gateway</description>
+    <name>insupclient-simulator</name>
+    <description>Test Simulator for Insupclient Gateway</description>
     
     <properties>
         <java.version>21</java.version>
@@ -54,7 +54,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.in.amas.simulator.TestSimulator</mainClass>
+                                                <mainClass>com.in.amas.insupclient.simulator.TestSimulator</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

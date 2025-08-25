@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Insup Application 시작 스크립트
+# Insupclient Application 시작 스크립트
 # 리눅스 환경에서 Spring Boot 애플리케이션을 시작하는 스크립트
 
 set -e
 
 echo "========================================"
-echo "Insup Application 시작 스크립트"
+echo "Insupclient Application 시작 스크립트"
 echo "========================================"
 
 # 환경 변수 설정
@@ -25,7 +25,7 @@ JAVA_OPTS="$JAVA_OPTS -Dserver.port=$SERVER_PORT"
 mkdir -p logs
 
 # JAR 파일 찾기
-JAR_FILE=$(find target -name "insup-application-*.jar" | head -n 1)
+JAR_FILE=$(find target -name "insupclient-*.jar" | head -n 1)
 
 if [ -z "$JAR_FILE" ]; then
     echo "❌ JAR 파일을 찾을 수 없습니다. Maven 빌드를 먼저 실행하세요."
@@ -40,7 +40,7 @@ echo "🔗 포트: $SERVER_PORT"
 echo ""
 
 # PID 파일 경로
-PID_FILE="./insup-app.pid"
+PID_FILE="./insupclient-app.pid"
 
 # 이미 실행 중인 프로세스 확인
 if [ -f "$PID_FILE" ]; then

@@ -1,11 +1,11 @@
-package com.in.amas.service;
+package com.in.amas.insupclient.service;
 
-import com.in.amas.dto.ClientConnectionInfo;
-import com.in.amas.dto.SipsvcMessage;
-import com.in.amas.dto.InsupcMessage;
-import com.in.amas.config.SecurityConfig;
-import com.in.amas.tcp.SipsvcTcpServer;
-import com.in.amas.tcp.InsupcTcpClient;
+import com.in.amas.insupclient.dto.ClientConnectionInfo;
+import com.in.amas.insupclient.dto.SipsvcMessage;
+import com.in.amas.insupclient.dto.InsupcMessage;
+import com.in.amas.insupclient.config.SecurityConfig;
+import com.in.amas.insupclient.tcp.SipsvcTcpServer;
+import com.in.amas.insupclient.tcp.InsupcTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

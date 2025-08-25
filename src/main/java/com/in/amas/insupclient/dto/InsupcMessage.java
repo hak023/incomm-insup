@@ -1,4 +1,4 @@
-package com.in.amas.dto;
+package com.in.amas.insupclient.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

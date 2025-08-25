@@ -3,7 +3,7 @@ FROM openjdk:17-jdk-slim
 
 # 메타데이터 설정
 LABEL maintainer="InComm"
-LABEL description="Insup Application for Linux Environment"
+LABEL description="Insupclient Application for Linux Environment"
 LABEL version="1.0.0"
 
 # 필요한 패키지 설치
@@ -20,7 +20,7 @@ WORKDIR /app
 RUN mkdir -p /app/logs
 
 # JAR 파일 복사
-COPY target/insup-application-*.jar /app/app.jar
+COPY target/insupclient-*.jar /app/app.jar
 
 # 애플리케이션 설정 파일 복사 (필요시)
 COPY src/main/resources/application.yml /app/application.yml

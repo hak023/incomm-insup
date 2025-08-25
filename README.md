@@ -1,4 +1,4 @@
-# Incomm-Insup Gateway Server
+# Insupclient Gateway Server
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/projects/jdk/21/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-green.svg)](https://spring.io/projects/spring-boot)
@@ -9,7 +9,7 @@
 
 ## 📋 개요
 
-**Incomm-Insup**은 전화 호가 인입될 때 sipsvc 프로세스와 INSUPC(가입자 정보 조회) 프로세스 간의 통신을 중계하는 Gateway 서버입니다.
+**Insupclient**는 전화 호가 인입될 때 sipsvc 프로세스와 INSUPC(가입자 정보 조회) 프로세스 간의 통신을 중계하는 Gateway 서버입니다.
 
 ### 🔄 C++ 기존 구현과의 호환성
 
@@ -40,7 +40,7 @@ graph TB
         B[INSUPC Server]
     end
     
-    subgraph "Incomm-Insup Gateway"
+    subgraph "Insupclient Gateway"
         C[SipsvcTcpServer<br/>Port: 9090]
         D[ConnectionManager]
         E[WorkerThreadPool<br/>8 Threads]
@@ -174,7 +174,7 @@ cd incomm-insup
 docker-compose up -d
 
 # 로그 확인
-docker-compose logs -f incomm-insup
+docker-compose logs -f insupclient-app
 
 # 정지
 docker-compose down
@@ -276,22 +276,22 @@ curl http://localhost:8080/api/actuator/metrics
 
 ### 로그 파일
 
-- `logs/incomm-insup.log` - 전체 애플리케이션 로그
-- `logs/incomm-insup_tcp.log` - TCP 통신 전용 로그
-- `logs/incomm-insup_worker.log` - WorkerThread 전용 로그
-- `logs/incomm-insup_error.log` - 오류 로그
+- `logs/insupclient.log` - 전체 애플리케이션 로그
+- `logs/insupclient_tcp.log` - TCP 통신 전용 로그
+- `logs/insupclient_worker.log` - WorkerThread 전용 로그
+- `logs/insupclient_error.log` - 오류 로그
 
 ### 실시간 로그 모니터링
 
 ```bash
 # 전체 로그
-tail -f logs/incomm-insup.log
+tail -f logs/insupclient.log
 
 # TCP 통신 로그
-tail -f logs/incomm-insup_tcp.log
+tail -f logs/insupclient_tcp.log
 
 # 워커 스레드 로그
-tail -f logs/incomm-insup_worker.log
+tail -f logs/insupclient_worker.log
 ```
 
 ## 🧪 테스트
@@ -317,7 +317,7 @@ java -jar test-simulator.jar
 
 ```mermaid
 classDiagram
-    class IncommInsupApplication {
+    class InsupclientApplication {
         +main(String[] args)
         +initialize()
     }
@@ -412,10 +412,10 @@ classDiagram
         +long totalRequests
     }
     
-    IncommInsupApplication --> SipsvcTcpServer
-    IncommInsupApplication --> InsupcTcpClient
-    IncommInsupApplication --> ConnectionManagementService
-    IncommInsupApplication --> WorkerThreadPool
+    InsupclientApplication --> SipsvcTcpServer
+    InsupclientApplication --> InsupcTcpClient
+    InsupclientApplication --> ConnectionManagementService
+    InsupclientApplication --> WorkerThreadPool
     
     SipsvcTcpServer --> ConnectionManagementService
     SipsvcTcpServer --> WorkerThreadPool
@@ -445,7 +445,7 @@ classDiagram
 ### 디렉토리 구조
 
 ```
-incomm-insup/
+insupclient/
 ├── src/main/java/com/in/amas/
 │   ├── IncommInsupApplication.java     # 메인 애플리케이션
 │   ├── config/                         # 설정 클래스
@@ -647,8 +647,8 @@ struct InsupcHeader {
 ## 📞 지원
 
 - **개발팀**: InComm Development Team
-- **이슈 트래킹**: [GitHub Issues](https://github.com/hak023/incomm-insup/issues)
-- **문서**: [Wiki](https://github.com/hak023/incomm-insup/wiki)
+- **이슈 트래킹**: [GitHub Issues](https://github.com/hak023/insupclient/issues)
+- **문서**: [Wiki](https://github.com/hak023/insupclient/wiki)
 
 ---
 

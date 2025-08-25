@@ -1,7 +1,7 @@
-package com.in.amas.worker;
+package com.in.amas.insupclient.worker;
 
-import com.in.amas.dto.WorkerMessage;
-import com.in.amas.service.MessageProcessingService;
+import com.in.amas.insupclient.dto.WorkerMessage;
+import com.in.amas.insupclient.service.MessageProcessingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

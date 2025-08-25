@@ -1,4 +1,4 @@
-package com.in.amas.config;
+package com.in.amas.insupclient.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;

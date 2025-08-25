@@ -1,12 +1,12 @@
-package com.in.amas.service;
+package com.in.amas.insupclient.service;
 
-import com.in.amas.dto.WorkerMessage;
-import com.in.amas.dto.SipsvcMessage;
-import com.in.amas.dto.InsupcMessage;
-import com.in.amas.protocol.SipsvcProtocolParser;
-import com.in.amas.protocol.InsupcProtocolParser;
-import com.in.amas.tcp.SipsvcTcpServer;
-import com.in.amas.tcp.InsupcTcpClient;
+import com.in.amas.insupclient.dto.WorkerMessage;
+import com.in.amas.insupclient.dto.SipsvcMessage;
+import com.in.amas.insupclient.dto.InsupcMessage;
+import com.in.amas.insupclient.protocol.SipsvcProtocolParser;
+import com.in.amas.insupclient.protocol.InsupcProtocolParser;
+import com.in.amas.insupclient.tcp.SipsvcTcpServer;
+import com.in.amas.insupclient.tcp.InsupcTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

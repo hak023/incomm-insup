@@ -1,9 +1,9 @@
-package com.in.amas.simulator;
+package com.in.amas.insupclient.simulator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.in.amas.dto.SipsvcMessage;
-import com.in.amas.dto.InsupcMessage;
-import com.in.amas.protocol.InsupcProtocolParser;
+import com.in.amas.insupclient.dto.SipsvcMessage;
+import com.in.amas.insupclient.dto.InsupcMessage;
+import com.in.amas.insupclient.protocol.InsupcProtocolParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

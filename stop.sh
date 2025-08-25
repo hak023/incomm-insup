@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Insup Application 정지 스크립트
+# Insupclient Application 정지 스크립트
 # 리눅스 환경에서 Spring Boot 애플리케이션을 정지하는 스크립트
 
 set -e
 
 echo "========================================"
-echo "Insup Application 정지 스크립트"
+echo "Insupclient Application 정지 스크립트"
 echo "========================================"
 
 # PID 파일 경로
-PID_FILE="./insup-app.pid"
+PID_FILE="./insupclient-app.pid"
 
 # PID 파일 존재 확인
 if [ ! -f "$PID_FILE" ]; then

@@ -1,6 +1,6 @@
-package com.in.amas.worker;
+package com.in.amas.insupclient.worker;
 
-import com.in.amas.dto.WorkerMessage;
+import com.in.amas.insupclient.dto.WorkerMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

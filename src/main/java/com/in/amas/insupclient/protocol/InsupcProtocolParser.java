@@ -1,6 +1,6 @@
-package com.in.amas.protocol;
+package com.in.amas.insupclient.protocol;
 
-import com.in.amas.dto.InsupcMessage;
+import com.in.amas.insupclient.dto.InsupcMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

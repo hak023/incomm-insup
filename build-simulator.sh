@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Test Simulator 빌드 스크립트
+# Insupclient Test Simulator 빌드 스크립트
 # 별도의 실행 가능한 시뮬레이터 JAR 파일을 생성
 
 set -e
 
 echo "========================================"
-echo "Test Simulator 빌드 스크립트"
+echo "Insupclient Test Simulator 빌드 스크립트"
 echo "========================================"
 
 # Java 버전 확인
@@ -40,7 +40,7 @@ echo "🔨 시뮬레이터 빌드 시작..."
 mvn clean package -f simulator-pom.xml -DskipTests
 
 # 빌드 결과 확인
-SIMULATOR_JAR="target/test-simulator.jar"
+SIMULATOR_JAR="target/insupclient-simulator.jar"
 
 if [ -f "$SIMULATOR_JAR" ]; then
     echo ""
