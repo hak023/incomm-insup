@@ -157,21 +157,21 @@ public class TestSimulator {
             InsupcMessage request = insupcProtocolParser.parseMessage(messageData);
             
             log.info("📋 INSUPC 요청 처리 - 코드: {}, 세션: {}", 
-                    request.getCode(), request.getSessionId());
+                    request.getMsgCode(), request.getSessionId());
             
             InsupcMessage response = null;
             
-            switch (request.getCode()) {
-                case InsupcMessage.Code.LOGON_REQUEST:
-                    response = createLogonResponse(request);
+            switch (request.getMsgCode()) {
+                case InsupcMessage.MessageCode.DB_ACCESS_REQUEST:
+                    response = createAccessResponse(request);
                     break;
                     
-                case InsupcMessage.Code.QUERY_REQUEST:
+                case InsupcMessage.MessageCode.DB_QUERY_REQUEST:
                     response = createQueryResponse(request);
                     break;
                     
                 default:
-                    log.warn("알 수 없는 INSUPC 요청 코드: {}", request.getCode());
+                    log.warn("알 수 없는 INSUPC 요청 코드: {}", request.getMsgCode());
                     return;
             }
             
@@ -184,7 +184,7 @@ public class TestSimulator {
                 dos.flush();
                 
                 log.info("📤 INSUPC 응답 전송 완료 - 코드: {}, 크기: {} bytes", 
-                        response.getCode(), responseData.length);
+                        response.getMsgCode(), responseData.length);
             }
             
         } catch (Exception e) {
@@ -193,26 +193,31 @@ public class TestSimulator {
     }
     
     /**
-     * 로그온 응답 생성
+     * DB 접근 응답 생성 (C++ 구현과 동일)
      */
-    private InsupcMessage createLogonResponse(InsupcMessage request) {
+    private InsupcMessage createAccessResponse(InsupcMessage request) {
         return InsupcMessage.builder()
-                .code(InsupcMessage.Code.LOGON_RESPONSE)
-                .svca(0xb1)
-                .dvca(0xf0)
-                .asId(request.getAsId())
+                .msgCode(InsupcMessage.MessageCode.DB_ACCESS_RESPONSE)
+                .svca(request.getDvca())
+                .dvca(request.getSvca())
+                .inasId(request.getInasId())
                 .sessionId(request.getSessionId())
                 .svcId(request.getSvcId())
-                .result(1)  // 성공
+                .result(InsupcMessage.ResultCode.SUCCESS)
                 .wtime(getCurrentTimeString())
-                .dummy("")
+                .majorVersion(1)
+                .minorVersion(0)
+                .dummy(0)
+                .useRequestAck(InsupcMessage.RequestAck.DONT_USE_REQUEST_ACK)
                 .parameters(java.util.List.of(
                         InsupcMessage.InsupcParameter.builder()
-                                .type(InsupcMessage.InsupcParameter.Type.LOGON_INFO)
-                                .value(new byte[]{(byte)0xa2, 0x01, 0x01, 0x00})
+                                .type(InsupcMessage.InsupcParameter.Type.DB_LOGON_INFO)
+                                .size(8)
+                                .value(new byte[]{(byte)0xF0, 0x01, 0x01, 0x03, 127, 0, 0, 1})
                                 .build(),
                         InsupcMessage.InsupcParameter.builder()
                                 .type(InsupcMessage.InsupcParameter.Type.DB_STATUS)
+                                .size(2)
                                 .value("MA")
                                 .build()
                 ))
@@ -249,30 +254,51 @@ public class TestSimulator {
         );
         
         return InsupcMessage.builder()
-                .code(InsupcMessage.Code.QUERY_RESPONSE)
-                .svca(0xb1)
-                .dvca(0xf0)
-                .asId(request.getAsId())
+                .msgCode(InsupcMessage.MessageCode.DB_QUERY_RESPONSE)
+                .svca(request.getDvca())
+                .dvca(request.getSvca())
+                .inasId(request.getInasId())
                 .sessionId(request.getSessionId())
                 .svcId(request.getSvcId())
-                .result(1)  // 성공
+                .result(InsupcMessage.ResultCode.SUCCESS)
                 .wtime(getCurrentTimeString())
-                .dummy("")
+                .majorVersion(1)
+                .minorVersion(0)
+                .dummy(0)
+                .useRequestAck(InsupcMessage.RequestAck.DONT_USE_REQUEST_ACK)
                 .parameters(java.util.List.of(
                         InsupcMessage.InsupcParameter.builder()
-                                .type(InsupcMessage.InsupcParameter.Type.OPERATION_NAME)
+                                .type(InsupcMessage.InsupcParameter.Type.DB_OPERATION_NAME)
+                                .size("mcidPstnGetInfoV2".length() + 1)
                                 .value("mcidPstnGetInfoV2")
                                 .build(),
                         InsupcMessage.InsupcParameter.builder()
                                 .type(InsupcMessage.InsupcParameter.Type.SQL_OUTPUT)
+                                .size(calculateSqlOutputSize(sqlOutput))
                                 .value(sqlOutput)
                                 .build(),
                         InsupcMessage.InsupcParameter.builder()
                                 .type(InsupcMessage.InsupcParameter.Type.SQL_RESULT)
-                                .value(new byte[]{0x00, 0x00})
+                                .size(2)  // result_category(1) + result_value(1)
+                                .value(new byte[]{
+                                    (byte)InsupcMessage.InsupcParameter.SqlResultCategory.SUCCESS,
+                                    (byte)InsupcMessage.InsupcParameter.SqlResultValue.SUCCESS
+                                })
                                 .build()
                 ))
                 .build();
+    }
+    
+    /**
+     * SQL Output 파라미터 크기 계산
+     */
+    private int calculateSqlOutputSize(java.util.List<String> sqlOutput) {
+        int size = 1; // 필드 개수 (1바이트)
+        for (String field : sqlOutput) {
+            size += 2; // 길이 필드 (2바이트)
+            size += field.getBytes(java.nio.charset.StandardCharsets.UTF_8).length; // 값
+        }
+        return size;
     }
     
     /**

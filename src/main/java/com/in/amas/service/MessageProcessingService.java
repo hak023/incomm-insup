@@ -83,7 +83,7 @@ public class MessageProcessingService {
         String requestId = workerMessage.getRequestId();
         
         log.info("INSUPC 응답 처리 시작 - 요청 ID: {}, 코드: {}", 
-                requestId, insupcMessage.getCode());
+                requestId, insupcMessage.getMsgCode());
         
         try {
             // 요청 ID로 원래 연결 찾기
@@ -196,10 +196,12 @@ public class MessageProcessingService {
         requestConnectionMap.put(requestId, connectionId);
         
         try {
-            // INSUPC 질의 메시지 생성
+            // INSUPC 질의 메시지 생성 (C++ 구현과 동일)
+            java.util.List<String> inputValues = java.util.List.of(request.getPhoneNumber());
             InsupcMessage queryRequest = insupcProtocolParser.createQueryRequest(
-                    request.getPhoneNumber(), 
-                    1  // AS ID
+                    "mcidPstnGetInfoV2",  // API 이름
+                    inputValues,          // 입력 파라미터
+                    1                     // INAS ID
             );
             
             // INSUPC로 질의 전송
@@ -235,7 +237,7 @@ public class MessageProcessingService {
                     case InsupcMessage.InsupcParameter.Type.SQL_RESULT:
                         responseData.put("sql_result", param.getValue());
                         break;
-                    case InsupcMessage.InsupcParameter.Type.OPERATION_NAME:
+                    case InsupcMessage.InsupcParameter.Type.DB_OPERATION_NAME:
                         responseData.put("operation", param.getValue());
                         break;
                 }

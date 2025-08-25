@@ -11,6 +11,16 @@
 
 **Incomm-Insup**은 전화 호가 인입될 때 sipsvc 프로세스와 INSUPC(가입자 정보 조회) 프로세스 간의 통신을 중계하는 Gateway 서버입니다.
 
+### 🔄 C++ 기존 구현과의 호환성
+
+이 Java 구현체는 기존 C++ 구현체(`inas_ext_gw_plugin`)와 **프로토콜 레벨에서 완전히 호환**됩니다:
+
+- **INSUPC 프로토콜**: C++ `struct _t_insup_message_header` (62바이트 고정 헤더)와 동일한 구조
+- **메시지 코드**: C++ `enum e_insup_header_msg_code`와 동일한 상수 (`DB_QUERY_REQUEST=1`, `DB_QUERY_RESPONSE=2` 등)
+- **파라미터 타입**: C++ `enum e_insup_body_parameter_type`과 동일한 구조 (`DB_OPERATION_NAME=2`, `SQL_INPUT=3` 등)
+- **바이트 순서**: Little Endian 처리, 필드 크기 정확히 일치
+- **프로토콜 함수**: C++ 구현 (`generate_insup_db_operation_name_parameter`, `parse_sql_output_response_parameter` 등)과 동일한 로직
+
 ### 주요 기능
 
 - 🔄 **TCP 통신 중계**: sipsvc(JSON/TCP) ↔ INSUPC(Binary/TCP)
@@ -563,10 +573,59 @@ incomm-insup/
 3. **INSUPC 장애**: 다른 INSUPC 인스턴스로 failover
 4. **메모리 부족**: 큐 크기 제한 및 백프레셰 적용
 
+## 🔧 프로토콜 상세 (C++ 호환성)
+
+### INSUPC 메시지 헤더 구조
+
+```c
+// C++ struct _t_insup_message_header (62바이트)
+struct InsupcHeader {
+    uint16_t  msg_len;        // 2바이트: 바디 크기
+    uint8_t   msg_code;       // 1바이트: 메시지 코드
+    uint8_t   svca;           // 1바이트: Source VCA
+    uint8_t   dvca;          // 1바이트: Destination VCA  
+    uint8_t   inas_id;       // 1바이트: INAS ID
+    char      session_id[30]; // 30바이트: 세션 ID
+    char      svc_id[4];     // 4바이트: 서비스 ID
+    uint8_t   result;        // 1바이트: 결과 코드
+    char      wtime[17];     // 17바이트: 처리 시간
+    uint8_t   major_version; // 1바이트: Major 버전
+    uint8_t   minor_version; // 1바이트: Minor 버전
+    uint8_t   dummy;         // 1바이트: 더미
+    uint8_t   use_request_ack; // 1바이트: ACK 사용 여부
+};
+```
+
+### 메시지 코드 매핑
+
+| C++ Enum | Java Constant | 설명 |
+|----------|---------------|------|
+| `DB_QUERY_REQUEST = 1` | `MessageCode.DB_QUERY_REQUEST` | DB 질의 요청 |
+| `DB_QUERY_RESPONSE = 2` | `MessageCode.DB_QUERY_RESPONSE` | DB 질의 응답 |
+| `DB_ACCESS_REQUEST = 3` | `MessageCode.DB_ACCESS_REQUEST` | DB 접근 요청 |
+| `DB_ACCESS_RESPONSE = 4` | `MessageCode.DB_ACCESS_RESPONSE` | DB 접근 응답 |
+
+### 파라미터 타입 매핑
+
+| C++ Enum | Java Constant | 설명 |
+|----------|---------------|------|
+| `DB_OPERATION_NAME = 2` | `Type.DB_OPERATION_NAME` | API 이름 |
+| `SQL_INPUT = 3` | `Type.SQL_INPUT` | SQL 입력 파라미터 |
+| `SQL_OUTPUT = 4` | `Type.SQL_OUTPUT` | SQL 출력 결과 |
+| `SQL_RESULT = 5` | `Type.SQL_RESULT` | SQL 실행 결과 |
+
+### 호환성 보장 요소
+
+1. **바이트 순서**: Little Endian 일관 사용
+2. **필드 크기**: C++ 구조체와 정확히 일치
+3. **프로토콜 로직**: 동일한 파라미터 생성/파싱 로직
+4. **메시지 플로우**: 기존 C++ 시스템과 동일한 처리 순서
+
 ## 📝 변경 이력
 
 ### v1.0.0 (2025-01-06)
 - 초기 버전 릴리스
+- C++ 기존 구현과 프로토콜 호환성 확보
 - sipsvc-INSUPC Gateway 기본 기능 구현
 - TCP 서버/클라이언트 구현
 - WorkerThread Pool 및 비동기 처리
